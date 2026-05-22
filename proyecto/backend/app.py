@@ -195,12 +195,12 @@ def clerk_webhook():
 
 
 # ----- API blueprints -----
-app.register_blueprint(classrooms_bp, url_prefix="/classrooms")
-app.register_blueprint(students_bp, url_prefix="/students")
-app.register_blueprint(activities_bp, url_prefix="/activities")
-app.register_blueprint(grades_bp, url_prefix="/grades")
-app.register_blueprint(periods_bp, url_prefix="/periods")
-app.register_blueprint(teachers_bp, url_prefix="/teachers")
+app.register_blueprint(classrooms_bp, url_prefix="/api/classrooms")
+app.register_blueprint(students_bp, url_prefix="/api/students")
+app.register_blueprint(activities_bp, url_prefix="/api/activities")
+app.register_blueprint(grades_bp, url_prefix="/api/grades")
+app.register_blueprint(periods_bp, url_prefix="/api/periods")
+app.register_blueprint(teachers_bp, url_prefix="/api/teachers")
 
 
 # ----- SPA fallback: serve frontend -----
