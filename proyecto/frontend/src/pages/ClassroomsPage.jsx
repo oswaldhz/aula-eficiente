@@ -22,8 +22,10 @@ export default function ClassroomsPage() {
 
   const loadData = async () => {
     setIsLoading(true);
+    const periodo = localStorage.getItem("periodo");
+    const base = periodo ? `?period_id=${periodo}` : "";
     const [c, p] = await Promise.all([
-      fetchData("classrooms"),
+      fetchData(`classrooms${base}`),
       fetchData("periods"),
     ]);
     setClassrooms(c);
@@ -33,7 +35,8 @@ export default function ClassroomsPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", description: "", period_id: periods[0]?.id || "" });
+    const periodo = localStorage.getItem("periodo") || periods[0]?.id || "";
+    setForm({ name: "", description: "", period_id: periodo });
     setModalOpen(true);
   };
 
