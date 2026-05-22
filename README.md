@@ -342,6 +342,61 @@ The entire data model is scoped to one teacher. Every model has a `teacher_id` o
 
 ---
 
+## 🚀 Deployment
+
+### Deploy to Render (free tier)
+
+1. **Create a Render account** at [render.com](https://render.com)
+
+2. **Create a PostgreSQL database:**
+   - Dashboard → New → PostgreSQL
+   - Copy the **Internal Database URL**
+
+3. **Deploy the backend:**
+   - Dashboard → New → Web Service
+   - Connect your GitHub repo (`oswaldhz/aula-eficiente`)
+   - **Name:** `aula-eficiente-api`
+   - **Root Directory:** `proyecto/backend`
+   - **Runtime:** Python 3
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn app:app`
+   - **Instance Type:** Free
+
+4. **Set environment variables** in Render dashboard:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | Your Render PostgreSQL Internal URL |
+   | `CLERK_CLIENT_ID` | From Clerk Dashboard → API Keys |
+   | `CLERK_JWKS_URL` | `https://your-clerk-app.clerk.accounts.dev/.well-known/jwks.json` |
+   | `JWT_ISSUER` | `https://your-clerk-app.clerk.accounts.dev` |
+   | `CLERK_ALLOWED_AZP` | `https://your-app.onrender.com` |
+   | `CLERK_WEBHOOK_SECRET` | From Clerk Dashboard → Webhooks |
+   | `SECRET_KEY` | Generate: `python -c "import os; print(os.urandom(24).hex())"` |
+   | `FLASK_DEBUG` | `0` |
+   | `DEBUG_AUTH` | `0` |
+   | `CORS_ORIGINS` | `https://your-app.onrender.com` |
+
+5. **Update Clerk allowed origins:**
+   - Clerk Dashboard → Sessions → Add `https://your-app.onrender.com`
+
+6. **Run database migrations** (shell in Render):
+   ```bash
+   cd proyecto/backend
+   flask db upgrade
+   ```
+
+> **Note:** Render free tier web services spin down after 15 min of inactivity (cold start ~30s). Free PostgreSQL expires after 90 days — upgrade for production data.
+
+### Local development
+
+1. Copy `.env.example` → `proyecto/.env` and set your values
+2. Copy `.env.example` → `proyecto/frontend/.env.development` for frontend vars
+3. Start backend: `cd proyecto/backend && python app.py`
+4. Start frontend: `cd proyecto/frontend && npm run dev`
+
+---
+
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.

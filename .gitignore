@@ -36,3 +36,6 @@ docs/_build/
 .env/
 proyecto/.env
 proyecto/frontend/.env
+proyecto/backend/uploads/
+proyecto/backend/instance/
+
