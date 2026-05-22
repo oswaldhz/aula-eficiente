@@ -1,14 +1,18 @@
 from flask import Blueprint, request, jsonify
-from models import Activity
+from models import Activity, Classroom
 from database import SessionLocal
 
 bp = Blueprint("activities", __name__)
 
-@bp.route("/", methods=["GET"])
+@bp.route("", methods=["GET"])
 def get_activities():
+    period_id = request.args.get("period_id", type=int)
     session = SessionLocal()
     try:
-        activities = session.query(Activity).all()
+        query = session.query(Activity)
+        if period_id:
+            query = query.join(Classroom).filter(Classroom.period_id == period_id)
+        activities = query.all()
         return jsonify([
             {
                 "id": a.id,
@@ -44,9 +48,12 @@ def create_activity():
     finally:
         session.close()
 
+# Update y Delete mantienen la lógica anterior
+
+
 # ------------------ FUNCIONES CRUD NUEVAS ------------------
 
-@bp.route("/<int:id>", methods=["PUT"])
+@bp.route("/<int:id>/", methods=["PUT"])
 def update_activity(id):
     data = request.json
     session = SessionLocal()
@@ -67,7 +74,7 @@ def update_activity(id):
     finally:
         session.close()
 
-@bp.route("/<int:id>", methods=["DELETE"])
+@bp.route("/<int:id>/", methods=["DELETE"])
 def delete_activity(id):
     session = SessionLocal()
     try:

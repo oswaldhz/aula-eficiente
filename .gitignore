@@ -2,14 +2,17 @@
 node_modules/
 .pnp/
 .pnp.js
+.env/
 
 # testing
 coverage/
+.env/
 
 # production
 build/
 dist/
 out/
+.env/
 
 # misc
 .DS_Store
@@ -20,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 *.log
+.env/
 
 .idea/
 .vscode
@@ -29,3 +33,6 @@ dist/
 htmlcov/
 .tox/
 docs/_build/
+.env/
+proyecto/.env
+proyecto/frontend/.env
