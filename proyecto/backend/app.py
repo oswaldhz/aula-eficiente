@@ -13,8 +13,10 @@ from routes.periods import bp as periods_bp
 from routes.teachers import bp as teachers_bp
 from models import Teacher
 from database import SessionLocal
+import base64
 import jwt
-from jwt.algorithms import RSAAlgorithm
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+from cryptography.hazmat.backends import default_backend
 from sqlalchemy import func
 import hmac
 import hashlib
@@ -48,6 +50,13 @@ CORS(
 _jwks_cache = {"keys": None, "fetched_at": 0}
 JWKS_CACHE_DURATION = 300
 
+def _jwk_to_public_key(jwk_dict):
+    n_bytes = base64.urlsafe_b64decode(jwk_dict["n"] + "==")
+    e_bytes = base64.urlsafe_b64decode(jwk_dict["e"] + "==")
+    n = int.from_bytes(n_bytes, "big")
+    e = int.from_bytes(e_bytes, "big")
+    return RSAPublicNumbers(e, n).public_key(default_backend())
+
 def get_public_key_from_jwks(kid: str):
     if _jwks_cache["keys"] is None or (time.time() - _jwks_cache["fetched_at"]) > JWKS_CACHE_DURATION:
         resp = requests.get(CLERK_JWKS_URL, timeout=5)
@@ -58,7 +67,7 @@ def get_public_key_from_jwks(kid: str):
 
     for key in _jwks_cache["keys"]:
         if key.get("kid") == kid:
-            return RSAAlgorithm.from_jwk(json.dumps(key))
+            return _jwk_to_public_key(key)
 
     raise Exception("Public key not found for kid")
 
