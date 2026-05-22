@@ -37,9 +37,10 @@ DEBUG_AUTH = os.environ.get("DEBUG_AUTH", "0") == "1"
 CLERK_ALLOWED_AZP = [s.strip() for s in os.environ.get("CLERK_ALLOWED_AZP", "http://localhost:3000").split(",") if s.strip()]
 CLERK_WEBHOOK_SECRET = os.environ.get("CLERK_WEBHOOK_SECRET")
 
-app = Flask(__name__, static_folder="../frontend/dist", static_url_path="")
+app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
 app.url_map.strict_slashes = False
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
 
 cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
 CORS(
@@ -207,11 +208,13 @@ app.register_blueprint(teachers_bp, url_prefix="/api/teachers")
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    if path and os.path.exists(os.path.join(app.static_folder or "", path)):
-        return send_from_directory(app.static_folder, path)
-    index_path = os.path.join(app.static_folder or "", "index.html")
-    if os.path.exists(index_path):
-        return send_from_directory(app.static_folder, "index.html")
+    if path:
+        file_path = os.path.join(STATIC_DIR, path)
+        if os.path.isfile(file_path):
+            return send_from_directory(STATIC_DIR, path)
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.isfile(index_path):
+        return send_from_directory(STATIC_DIR, "index.html")
     return jsonify({"error": "Frontend not built. Run: cd frontend && npm run build"}), 503
 
 
