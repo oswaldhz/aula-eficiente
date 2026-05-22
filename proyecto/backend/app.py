@@ -10,8 +10,9 @@ from routes.activities import bp as activities_bp
 from routes.grades import bp as grades_bp
 from routes.periods import bp as periods_bp
 from routes.teachers import bp as teachers_bp
+import models
 from models import Teacher
-from database import SessionLocal
+from database import SessionLocal, Base, engine
 import base64
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
@@ -22,6 +23,9 @@ import hashlib
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 os.makedirs(os.path.join(os.path.dirname(__file__), "..", "uploads"), exist_ok=True)
+
+# Ensure database tables exist
+Base.metadata.create_all(bind=engine)
 
 CLERK_JWKS_URL = os.environ.get(
     "CLERK_JWKS_URL",
