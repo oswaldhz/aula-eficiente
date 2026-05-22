@@ -10,6 +10,7 @@ from routes.students import bp as students_bp
 from routes.activities import bp as activities_bp
 from routes.grades import bp as grades_bp
 from routes.periods import bp as periods_bp
+from routes.teachers import bp as teachers_bp
 from models import Teacher
 from database import SessionLocal
 import jwt
@@ -193,6 +194,7 @@ app.register_blueprint(students_bp, url_prefix="/students")
 app.register_blueprint(activities_bp, url_prefix="/activities")
 app.register_blueprint(grades_bp, url_prefix="/grades")
 app.register_blueprint(periods_bp, url_prefix="/periods")
+app.register_blueprint(teachers_bp, url_prefix="/teachers")
 
 if __name__ == "__main__":
     app.run(debug=True)

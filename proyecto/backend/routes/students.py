@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import Student, Classroom
 from database import SessionLocal
+import re
 
 bp = Blueprint("students", __name__)
 
@@ -36,6 +37,39 @@ def create_student():
         session.commit()
         session.refresh(student)
         return jsonify({"id": student.id, "message": "Student created"}), 201
+    finally:
+        session.close()
+
+# --------------------- BULK IMPORT ---------------------
+@bp.route("/bulk", methods=["POST"])
+def bulk_create_students():
+    data = request.json
+    students_data = data.get("students", [])
+    classroom_id = data.get("classroom_id")
+    if not students_data:
+        return jsonify({"error": "No students provided"}), 400
+    session = SessionLocal()
+    created = []
+    errors = []
+    try:
+        for i, s in enumerate(students_data):
+            name = (s.get("name") or "").strip()
+            identifier = (s.get("identifier") or "").strip()
+            if not name or not identifier:
+                errors.append({"row": i + 1, "error": "Name and identifier are required"})
+                continue
+            existing = session.query(Student).filter(Student.identifier == identifier).first()
+            if existing:
+                errors.append({"row": i + 1, "error": f"Duplicate identifier '{identifier}'"})
+                continue
+            student = Student(name=name, identifier=identifier, classroom_id=classroom_id)
+            session.add(student)
+            created.append({"name": name, "identifier": identifier})
+        session.commit()
+        return jsonify({"created": len(created), "errors": errors}), 201
+    except Exception as e:
+        session.rollback()
+        return jsonify({"error": str(e)}), 500
     finally:
         session.close()
 

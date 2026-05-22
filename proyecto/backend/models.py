@@ -7,6 +7,9 @@ class Teacher(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    profile_image_url = Column(String, nullable=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
     
     classrooms = relationship(
         "Classroom",

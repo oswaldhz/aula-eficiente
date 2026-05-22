@@ -1,90 +1,41 @@
-import { useAuth } from "@clerk/clerk-react";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+export { BASE_URL };
 
 export function useFetch() {
-  const { getToken } = useAuth()
-
-  async function fetchData(endpoint) {
-    const token = await getToken()
+  const headers = async () => {
+    let token = null;
     try {
-      const res = await fetch(`${BASE_URL}/${endpoint.toLowerCase() === 'classrooms' ? `classrooms/${localStorage.getItem('periodo')}` : endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return [];
-    }
-  }
-
-  async function postData(endpoint, data) {
-    const token = await getToken()
-    try {
-      const res = await fetch(`${BASE_URL}/${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
-    } catch (error) {
-      console.error("Error posting data:", error);
-      return null;
-    }
-  }
-
-  // --------------------------------------------------
-  // NUEVAS FUNCIONES CRUD: PUT y DELETE
-  // --------------------------------------------------
-
-  async function putData(endpoint, data) {
-    const token = await getToken()
-    try {
-      const res = await fetch(`${BASE_URL}/${endpoint}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
-    } catch (error) {
-      console.error("Error updating data:", error);
-      return null;
-    }
-  }
-
-  async function deleteData(endpoint) {
-    const token = await getToken()
-    try {
-      const res = await fetch(`${BASE_URL}/${endpoint}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      return null;
-    }
-  }
-
-  return {
-    fetchData,
-    postData,
-    putData,
-    deleteData
+      if (window.Clerk?.session) {
+        token = await window.Clerk.session.getToken();
+      }
+    } catch {}
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
   };
+
+  const doFetch = async (url, options = {}) => {
+    try {
+      const res = await fetch(url, { ...options, headers: { ...await headers(), ...options.headers } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (error) {
+      console.error("API error:", error);
+      return options.method === "GET" ? [] : null;
+    }
+  };
+
+  const fetchData = (endpoint) => doFetch(`${BASE_URL}/${endpoint}`, { method: "GET" });
+  const postData = (endpoint, data) => doFetch(`${BASE_URL}/${endpoint}`, { method: "POST", body: JSON.stringify(data) });
+  const putData = (endpoint, data) => doFetch(`${BASE_URL}/${endpoint}`, { method: "PUT", body: JSON.stringify(data) });
+  const deleteData = (endpoint) => doFetch(`${BASE_URL}/${endpoint}`, { method: "DELETE" });
+
+  return { fetchData, postData, putData, deleteData };
+}
+
+export async function fetchWithToken(endpoint, token, options = {}) {
+  const h = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers };
+  return fetch(`${BASE_URL}/${endpoint}`, { ...options, headers: h });
 }
