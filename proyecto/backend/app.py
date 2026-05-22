@@ -20,6 +20,7 @@ import hmac
 import hashlib
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+os.makedirs(os.path.join(os.path.dirname(__file__), "..", "uploads"), exist_ok=True)
 
 CLERK_JWKS_URL = os.environ.get(
     "CLERK_JWKS_URL",

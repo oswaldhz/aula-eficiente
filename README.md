@@ -356,10 +356,10 @@ The entire data model is scoped to one teacher. Every model has a `teacher_id` o
    - Dashboard → New → Web Service
    - Connect your GitHub repo (`oswaldhz/aula-eficiente`)
    - **Name:** `aula-eficiente-api`
-   - **Root Directory:** `proyecto/backend`
+   - **Root Directory:** `.` (repo root)
    - **Runtime:** Python 3
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app`
+   - **Build Command:** `chmod +x build.sh && ./build.sh`
+   - **Start Command:** `cd proyecto/backend && gunicorn app:app`
    - **Instance Type:** Free
 
 4. **Set environment variables** in Render dashboard:
