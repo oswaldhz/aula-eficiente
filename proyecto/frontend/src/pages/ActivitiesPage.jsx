@@ -23,9 +23,11 @@ export default function ActivitiesPage() {
 
   const loadData = async () => {
     setIsLoading(true);
+    const periodo = localStorage.getItem("periodo");
+    const base = periodo ? `?period_id=${periodo}` : "";
     const [a, c] = await Promise.all([
       fetchData("activities"),
-      fetchData("classrooms"),
+      fetchData(`classrooms${base}`),
     ]);
     setActivities(a);
     setClassrooms(c);

@@ -43,7 +43,9 @@ export default function GradesPage() {
   }, [selectedClassroom, selectedActivity]);
 
   const loadClassrooms = async () => {
-    const c = await fetchData("classrooms");
+    const periodo = localStorage.getItem("periodo");
+    const base = periodo ? `?period_id=${periodo}` : "";
+    const c = await fetchData(`classrooms${base}`);
     setClassrooms(c);
     setIsLoading(false);
   };

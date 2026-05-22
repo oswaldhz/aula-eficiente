@@ -29,9 +29,11 @@ export default function StudentsPage() {
 
   const loadData = async () => {
     setIsLoading(true);
+    const periodo = localStorage.getItem("periodo");
+    const base = periodo ? `?period_id=${periodo}` : "";
     const [s, c] = await Promise.all([
       fetchData("students"),
-      fetchData("classrooms"),
+      fetchData(`classrooms${base}`),
     ]);
     setStudents(s);
     setClassrooms(c);
