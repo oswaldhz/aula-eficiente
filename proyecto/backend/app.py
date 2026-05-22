@@ -1,6 +1,5 @@
 import os
 import time
-import json
 import requests
 from dotenv import load_dotenv
 from flask import Flask, request, g, jsonify, send_from_directory
