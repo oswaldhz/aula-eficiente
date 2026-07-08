@@ -6,12 +6,15 @@ let db = null;
 try {
   if (!admin.apps.length) {
     const key = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+    const dbUrl = (process.env.FIREBASE_DATABASE_URL || "").replace(/^["']|["']$/g, "");
+    const projectId = (process.env.FIREBASE_PROJECT_ID || "").replace(/^["']|["']$/g, "");
+    const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || "").replace(/^["']|["']$/g, "");
     const cred = admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      projectId,
+      clientEmail,
       privateKey: key,
     });
-    admin.initializeApp({ credential: cred, databaseURL: process.env.FIREBASE_DATABASE_URL });
+    admin.initializeApp({ credential: cred, databaseURL: dbUrl });
   }
   db = admin.database();
   firebaseError = null;
