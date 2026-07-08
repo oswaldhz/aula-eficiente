@@ -146,7 +146,16 @@ app.use(async (req, res, next) => {
 
   const clerkUserId = await getTeacherIdFromToken(req);
   if (!clerkUserId) {
-    return res.status(401).json({ error: "Unauthorized: invalid token" });
+    return res.status(401).json({
+      error: "Unauthorized: invalid token",
+      _debug: {
+        CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? `set (len=${process.env.CLERK_SECRET_KEY.length})` : "NOT SET",
+        CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
+        hasAuthHeader: !!req.headers.authorization,
+        authHeaderPrefix: req.headers.authorization ? req.headers.authorization.slice(0, 15) + "..." : null,
+        node: process.version,
+      },
+    });
   }
 
   const teacher = await ensureTeacherExists(clerkUserId);
