@@ -3,9 +3,11 @@ const cors = require("cors");
 const { Webhook } = require("svix");
 const { createClerkClient, verifyToken } = require("@clerk/backend");
 const { admin, db, isFirebaseReady, getFirebaseError } = require("../lib/firebase");
+const multer = require("multer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const clerkPk = process.env.CLERK_PUBLISHABLE_KEY || process.env.CLERK_CLIENT_ID || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY || "";
 let clerkClient;
@@ -164,6 +166,32 @@ app.get("/api/debug-auth", async (req, res) => {
     return res.json({ error: e.message });
   }
 });
+
+app.post("/api/upload-profile-image", upload.single("file"), asyncHandler(async (req, res) => {
+  const userId = await getTeacherIdFromToken(req);
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.file) return res.status(400).json({ error: "No file provided" });
+  try {
+    const clerkForm = new FormData();
+    clerkForm.append("file", new Blob([req.file.buffer], { type: "image/jpeg" }), "profile.jpg");
+    const clerkResp = await fetch(
+      `https://api.clerk.com/v1/users/${userId}/profile_image`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}` },
+        body: clerkForm,
+      }
+    );
+    if (!clerkResp.ok) {
+      const errText = await clerkResp.text();
+      return res.status(clerkResp.status).json({ error: `Clerk API error: ${errText}` });
+    }
+    const data = await clerkResp.json();
+    res.json({ imageUrl: data.image_url || data.profileImageUrl || data.imageUrl });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}));
 
 app.use(asyncHandler(async (req, res, next) => {
   if (req.method === "OPTIONS") return next();

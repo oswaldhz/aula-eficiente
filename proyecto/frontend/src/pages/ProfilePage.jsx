@@ -211,17 +211,14 @@ export default function ProfilePage() {
     try {
       const compressed = await compressImage(file, 512);
       const token = await getToken();
-      const formData = new FormData();
-      formData.append("file", compressed, "profile.jpg");
-      const clerkResp = await fetch(
-        `https://proper-mullet-33.clerk.accounts.dev/v1/me/profile_image?__clerk_api_version=2025-11-10`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
-      if (!clerkResp.ok) throw new Error(`Clerk upload failed: ${await clerkResp.text()}`);
+      const uploadForm = new FormData();
+      uploadForm.append("file", compressed, "profile.jpg");
+      const clerkResp = await fetch("/api/upload-profile-image", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: uploadForm,
+      });
+      if (!clerkResp.ok) throw new Error(`Upload failed: ${await clerkResp.text()}`);
       const clerkData = await clerkResp.json();
       const newUrl = clerkData.imageUrl;
 
