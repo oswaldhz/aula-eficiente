@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Webhook } = require("svix");
 const { createClerkClient } = require("@clerk/backend");
-const { admin, db } = require("../lib/firebase");
+const { admin, db, isFirebaseReady } = require("../lib/firebase");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -148,6 +148,10 @@ app.get("/api/debug-auth", async (req, res) => {
 app.use(async (req, res, next) => {
   if (req.method === "OPTIONS") return next();
   if (req.path === "/api/clerk-webhook") return next();
+  if (req.path === "/api/debug-env" || req.path === "/api/debug-auth") return next();
+  if (!isFirebaseReady()) {
+    return res.status(500).json({ error: "Firebase not initialized", _debug: { CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? "set" : "NOT SET", FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "set" : "NOT SET" } });
+  }
 
   const clerkUserId = await getTeacherIdFromToken(req);
   if (!clerkUserId) {
