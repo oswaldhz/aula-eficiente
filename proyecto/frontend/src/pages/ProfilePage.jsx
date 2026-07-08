@@ -244,6 +244,7 @@ export default function ProfilePage() {
     setProfileImageUrl(pendingImageUrl);
     setShowCropModal(false);
     toast({ title: "Profile photo updated", status: "success" });
+    window.dispatchEvent(new CustomEvent("profile-updated"));
   };
 
   const handleCropCancel = () => {

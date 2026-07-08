@@ -37,10 +37,10 @@ function PeriodSelector({ periodos }) {
 
 function AppContent() {
   const [periodos, setPeriodos] = useState([]);
-  const { periodId, setPeriodId } = usePeriod();
+  const { periodId, setPeriodId, refreshKey } = usePeriod();
   const { getToken } = useAuth();
 
-  useEffect(() => { loadPeriodos(); }, []);
+  useEffect(() => { loadPeriodos(); }, [refreshKey]);
 
   useEffect(() => {
     if (periodos.length > 0 && !periodos.find((p) => p.id.toString() === periodId?.toString())) {

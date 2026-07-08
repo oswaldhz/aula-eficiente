@@ -6,9 +6,11 @@ import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
+import { usePeriod } from "../context/PeriodContext";
 
 export default function PeriodsPage() {
   const { fetchData, postData, putData, deleteData } = useFetch();
+  const { triggerRefresh } = usePeriod();
   const [periods, setPeriods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -34,12 +36,12 @@ export default function PeriodsPage() {
     const payload = { ...form, year: Number(form.year) || new Date().getFullYear() };
     if (editing) await putData(`periods/${editing.id}`, payload);
     else await postData("periods", payload);
-    setSaving(false); setModalOpen(false); loadData();
+    setSaving(false); setModalOpen(false); loadData(); triggerRefresh();
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this period?")) return;
-    await deleteData(`periods/${id}`); loadData();
+    await deleteData(`periods/${id}`); loadData(); triggerRefresh();
   };
 
   const filtered = periods.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase()) || String(p.year).includes(search));
