@@ -80,8 +80,14 @@ async function getTeacherIdFromToken(req) {
 
   const token = parts[1];
   try {
+    const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    const origin = req.headers.origin || (host ? `${proto}://${host}` : undefined);
+    const authorizedParties = [origin, process.env.CLERK_ALLOWED_AZP].filter(Boolean);
+
     const decoded = await clerkClient.verifyToken(token, {
       jwtKey: process.env.CLERK_JWT_KEY,
+      authorizedParties: authorizedParties.length > 0 ? authorizedParties : undefined,
     });
     return decoded.sub;
   } catch {
