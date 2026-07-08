@@ -149,13 +149,15 @@ app.get("/api/debug-auth", async (req, res) => {
     let verifyResult = null, verifyError = null;
     try {
       const url = `${req.protocol || "https"}://${req.headers.host || "localhost"}${req.originalUrl || req.url}`;
-      const headers = new Headers();
+      const webHeaders = new Headers();
       for (const [k, v] of Object.entries(req.headers)) {
-        if (v) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
+        if (v) webHeaders.set(k, Array.isArray(v) ? v.join(", ") : v);
       }
-      const state = await clerkClient.authenticateRequest(new Request(url, { method: req.method, headers }));
+      const webReq = new Request(url, { method: req.method, headers: webHeaders });
+      const state = await clerkClient.authenticateRequest(webReq);
+      let stateDetails = JSON.stringify({ isAuthenticated: state.isAuthenticated, reason: state.reason, message: state.message, status: state.status, isHandshake: state.isHandshake, isInterstitial: state.isInterstitial, headers: Object.keys(Object.fromEntries(webHeaders)), url });
       verifyResult = state.isAuthenticated ? { sub: state.toAuth().userId } : null;
-      if (!state.isAuthenticated) verifyError = `Not authenticated: ${state.reason || state.message || "unknown"}`;
+      if (!state.isAuthenticated) verifyError = stateDetails;
     } catch (e) {
       verifyError = e?.errors || e?.message || String(e);
     }
