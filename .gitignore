@@ -27,16 +27,11 @@ yarn-error.log*
 
 .idea/
 .vscode
-__pycache__/
 dist/
-.coverage*
-htmlcov/
-.tox/
-docs/_build/
 .env/
 proyecto/.env
 proyecto/frontend/.env
-proyecto/uploads/
-proyecto/backend/instance/
+proyecto/api/node_modules/
+.vercel/
 
 

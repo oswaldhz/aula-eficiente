@@ -210,26 +210,19 @@ export default function ProfilePage() {
     setIsUploading(true);
     try {
       const compressed = await compressImage(file, 512);
-      const formData = new FormData();
-      formData.append("image", compressed);
-      const token = await getToken();
+      const updatedUser = await user.setProfileImage(compressed);
+      const newUrl = updatedUser.imageUrl;
 
-      const res = await fetch(`${BASE_URL}/teachers/profile/image`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      const token = await getToken();
+      await fetchWithToken("teachers/profile", token, {
+        method: "PUT",
+        body: JSON.stringify({ profile_image_url: newUrl }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const fullUrl = toAbsolute(data.profile_image_url);
-        setPendingImageUrl(fullUrl);
-        setCropZoom(1);
-        setCropPos({ x: 50, y: 50 });
-        setShowCropModal(true);
-      } else {
-        toast({ title: "Upload failed", status: "error" });
-      }
+      setPendingImageUrl(newUrl);
+      setCropZoom(1);
+      setCropPos({ x: 50, y: 50 });
+      setShowCropModal(true);
     } catch {
       toast({ title: "Error uploading photo", status: "error" });
     } finally {
