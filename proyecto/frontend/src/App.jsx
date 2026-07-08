@@ -43,7 +43,9 @@ function AppContent() {
   useEffect(() => { loadPeriodos(); }, [refreshKey]);
 
   useEffect(() => {
-    if (periodos.length > 0 && !periodos.find((p) => p.id.toString() === periodId?.toString())) {
+    if (periodos.length === 0) {
+      setPeriodId("");
+    } else if (!periodos.find((p) => p.id.toString() === periodId?.toString())) {
       setPeriodId(periodos[0]?.id || "");
     }
   }, [periodos, periodId, setPeriodId]);
