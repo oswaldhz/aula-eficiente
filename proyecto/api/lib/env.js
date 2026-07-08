@@ -1,6 +1,5 @@
 const REQUIRED = [
   ["CLERK_SECRET_KEY", "Clerk API secret key"],
-  ["CLERK_PUBLISHABLE_KEY", "Clerk publishable key (or VITE_CLERK_PUBLISHABLE_KEY)"],
   ["FIREBASE_PROJECT_ID", "Firebase project ID"],
   ["FIREBASE_DATABASE_URL", "Firebase Realtime Database URL"],
   ["FIREBASE_CLIENT_EMAIL", "Firebase service account client email"],
@@ -8,6 +7,7 @@ const REQUIRED = [
 ];
 
 const OPTIONAL = [
+  ["CLERK_PUBLISHABLE_KEY or VITE_CLERK_PUBLISHABLE_KEY", "Clerk publishable key"],
   ["CLERK_WEBHOOK_SECRET", "Clerk webhook signing secret"],
   ["PORT", "Server port (default: 3000)"],
 ];
