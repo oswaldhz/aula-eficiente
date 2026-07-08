@@ -120,7 +120,7 @@ app.get("/api/debug-env", (req, res) => {
     isFirebaseReady: isFirebaseReady(),
     dbIsNull: db === null,
     firebaseError: getFirebaseError(),
-    dbUrl: (process.env.FIREBASE_DATABASE_URL || "").slice(0, 30) + "...",
+    dbUrl: (process.env.FIREBASE_DATABASE_URL || "").length > 0 ? process.env.FIREBASE_DATABASE_URL.slice(0, 40) : "EMPTY",
     node: process.version,
   });
 });
