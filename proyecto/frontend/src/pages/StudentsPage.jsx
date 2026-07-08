@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
 import { useFetch } from "../api";
 import { usePeriod } from "../context/PeriodContext";
 import * as XLSX from "xlsx";
 import {
-  Plus, Search, Users, Edit3, Trash2, X, Save,
-  MoreVertical, Upload, Download, FileSpreadsheet, User
+  Plus, Users, Edit3, Trash2, Upload, Download,
+  MoreVertical, X, User, FileSpreadsheet
 } from "lucide-react";
+import { motion } from "framer-motion";
+import PageHeader from "../components/ui/PageHeader";
+import SearchFilter from "../components/ui/SearchFilter";
+import CrudModal from "../components/ui/CrudModal";
+import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
+import ContextMenu from "../components/ui/ContextMenu";
 
 export default function StudentsPage() {
   const { fetchData, postData, putData, deleteData } = useFetch();
@@ -76,9 +81,7 @@ export default function StudentsPage() {
   };
 
   const downloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([
-      { name: "", identifier: "" },
-    ]);
+    const ws = XLSX.utils.json_to_sheet([{ name: "", identifier: "" }]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Students");
     XLSX.writeFile(wb, "students_template.xlsx");
@@ -128,336 +131,275 @@ export default function StudentsPage() {
   });
 
   return (
-    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Students</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your students</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setImportOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
-          >
-            <Upload size={16} /> Import
-          </button>
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium"
-          >
-            <Plus size={16} /> Add Student
-          </button>
-        </div>
-      </div>
+    <div className="page-enter">
+      <PageHeader
+        title="Students"
+        subtitle="Manage your students"
+        actions={
+          <>
+            <button
+              onClick={() => setImportOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
+            >
+              <Upload size={15} /> Import
+            </button>
+            <button
+              onClick={openCreate}
+              className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
+            >
+              <Plus size={15} /> Add
+            </button>
+          </>
+        }
+      />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search students..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-          />
-        </div>
-        <select
-          value={classroomFilter}
-          onChange={(e) => setClassroomFilter(e.target.value)}
-          className="px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-        >
-          <option value="">All classrooms</option>
-          {classrooms.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
+      <SearchFilter
+        value={search}
+        onChange={setSearch}
+        placeholder="Search students..."
+        filters={
+          <select
+            value={classroomFilter}
+            onChange={(e) => setClassroomFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all"
+          >
+            <option value="">All classrooms</option>
+            {classrooms.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        }
+      />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="h-1 bg-gray-200 dark:bg-gray-800 animate-pulse" />
-              <div className="p-5 space-y-3">
-                <div className="h-5 w-2/3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                <div className="h-4 w-1/3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <SkeletonGrid />
       ) : filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((stu, i) => (
-            <motion.div
+        <CardGrid>
+          {filtered.map((stu) => (
+            <div
               key={stu.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all relative group"
+              className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all relative group"
             >
-              <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400 rounded-t-2xl" />
               <div className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/50">
-                      <User size={20} className="text-emerald-600 dark:text-emerald-400" />
+                    <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400">
+                      <User size={18} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{stu.name}</h3>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{stu.name}</h3>
                       {stu.identifier && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">ID: {stu.identifier}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ID: {stu.identifier}</p>
                       )}
                     </div>
                   </div>
                   <div className="relative">
                     <button
                       onClick={() => setMenuOpen(menuOpen === stu.id ? null : stu.id)}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100 text-gray-400"
                     >
-                      <MoreVertical size={16} className="text-gray-400" />
+                      <MoreVertical size={15} />
                     </button>
-                    {menuOpen === stu.id && (
-                      <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg z-10 py-1">
-                        <button
-                          onClick={() => openEdit(stu)}
-                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          <Edit3 size={14} /> Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(stu.id)}
-                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          <Trash2 size={14} /> Delete
-                        </button>
-                      </div>
-                    )}
+                    <ContextMenu
+                      open={menuOpen === stu.id}
+                      onClose={() => setMenuOpen(null)}
+                      items={[
+                        { icon: <Edit3 size={14} />, label: "Edit", onClick: () => openEdit(stu) },
+                        { icon: <Trash2 size={14} />, label: "Delete", onClick: () => handleDelete(stu.id), danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
                 {stu.classroom_name && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 flex items-center gap-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 flex items-center gap-1">
                     <Users size={12} /> {stu.classroom_name}
                   </p>
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
-        </div>
+        </CardGrid>
       ) : (
-        <div className="text-center py-16">
-          <Users size={56} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No students found</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            {search ? "Try a different search term" : "Add students manually or import from Excel"}
-          </p>
-          <div className="flex justify-center gap-3">
-            <button
-              onClick={openCreate}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium"
+        <EmptyState
+          icon={Users}
+          title="No students found"
+          description={search ? "Try a different search term" : "Add students manually or import from Excel"}
+          action={
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={openCreate}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
+              >
+                <Plus size={15} /> Add
+              </button>
+              <button
+                onClick={() => setImportOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
+              >
+                <Upload size={15} /> Import
+              </button>
+            </div>
+          }
+        />
+      )}
+
+      <CrudModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? "Edit Student" : "New Student"}
+        onSave={handleSave}
+        saving={saving}
+        saveLabel={editing ? "Update" : "Create"}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name</label>
+            <input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all placeholder:text-gray-400"
+              placeholder="Student name"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Identifier</label>
+            <input
+              value={form.identifier}
+              onChange={(e) => setForm({ ...form, identifier: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all placeholder:text-gray-400"
+              placeholder="Student ID"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Classroom</label>
+            <select
+              value={form.classroom_id}
+              onChange={(e) => setForm({ ...form, classroom_id: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all"
             >
-              <Plus size={16} /> Add Student
-            </button>
-            <button
-              onClick={() => setImportOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
-            >
-              <Upload size={16} /> Import
-            </button>
+              <option value="">Select a classroom</option>
+              {classrooms.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
         </div>
-      )}
-
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl w-full max-w-md mx-4 overflow-hidden"
-          >
-            <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400 rounded-t-2xl" />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {editing ? "Edit Student" : "New Student"}
-                </h2>
-                <button onClick={() => setModalOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <X size={18} className="text-gray-400" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Name</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-                    placeholder="Student name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Identifier</label>
-                  <input
-                    value={form.identifier}
-                    onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-                    placeholder="Student ID"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Classroom</label>
-                  <select
-                    value={form.classroom_id}
-                    onChange={(e) => setForm({ ...form, classroom_id: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-                  >
-                    <option value="">Select a classroom</option>
-                    {classrooms.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !form.name.trim()}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium disabled:opacity-50"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Save size={16} />
-                  )}
-                  {editing ? "Update" : "Create"}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      </CrudModal>
 
       {importOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl w-full max-w-lg mx-4 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-2xl w-full max-w-lg overflow-hidden"
           >
-            <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400 rounded-t-2xl" />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Import Students</h2>
-                <button onClick={() => { setImportOpen(false); setImportData([]); }} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <X size={18} className="text-gray-400" />
+            <div className="flex items-center justify-between px-5 pt-5 pb-2">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Import Students</h2>
+              <button
+                onClick={() => { setImportOpen(false); setImportData([]); }}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="px-5 pb-2 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Target Classroom</label>
+                <select
+                  value={importClassroom}
+                  onChange={(e) => setImportClassroom(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all"
+                >
+                  <option value="">Select a classroom</option>
+                  {classrooms.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleFileDrop}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                  dragOver
+                    ? "border-brand-400 bg-brand-50 dark:bg-brand-900/20"
+                    : "border-gray-300 dark:border-gray-700 hover:border-brand-400 dark:hover:border-brand-600"
+                }`}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={32} className="mx-auto text-gray-400 mb-2" />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Drop your Excel file here or click to browse
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">.xlsx files supported</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                  onChange={handleFileDrop}
+                />
+              </div>
+
+              <div className="flex items-center">
+                <button
+                  onClick={downloadTemplate}
+                  className="flex items-center gap-1.5 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium"
+                >
+                  <Download size={13} /> Download template
                 </button>
               </div>
 
-              <div className="space-y-4">
+              {importData.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Target Classroom</label>
-                  <select
-                    value={importClassroom}
-                    onChange={(e) => setImportClassroom(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
-                  >
-                    <option value="">Select a classroom</option>
-                    {classrooms.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleFileDrop}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-                    dragOver
-                      ? "border-brand-500 bg-brand-50 dark:bg-brand-950/30"
-                      : "border-gray-300 dark:border-gray-700 hover:border-brand-400 dark:hover:border-brand-600"
-                  }`}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload size={36} className="mx-auto text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Drop your Excel file here or click to browse
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    {importData.length} row(s) detected
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">.xlsx files supported</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    className="hidden"
-                    onChange={handleFileDrop}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={downloadTemplate}
-                    className="flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium"
-                  >
-                    <Download size={14} /> Download template
-                  </button>
-                </div>
-
-                {importData.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {importData.length} row(s) detected
-                    </p>
-                    <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-xl">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-800">
-                          <tr>
-                            <th className="text-left px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Name</th>
-                            <th className="text-left px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Identifier</th>
+                  <div className="max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400">Name</th>
+                          <th className="text-left px-3 py-2 font-medium text-gray-500 dark:text-gray-400">Identifier</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {importData.map((row, i) => (
+                          <tr key={i}>
+                            <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{row.name || row.Name || row.NOMBRE || ""}</td>
+                            <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{row.identifier || row.Identifier || row.ID || ""}</td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {importData.map((row, i) => (
-                            <tr key={i}>
-                              <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{row.name || row.Name || row.NOMBRE || ""}</td>
-                              <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{row.identifier || row.Identifier || row.ID || ""}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+              <button
+                onClick={() => { setImportOpen(false); setImportData([]); }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={saving || !importClassroom || importData.length === 0}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50"
+              >
+                {saving ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <FileSpreadsheet size={14} />
                 )}
-              </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => { setImportOpen(false); setImportData([]); }}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleImport}
-                  disabled={saving || !importClassroom || importData.length === 0}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium disabled:opacity-50"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <FileSpreadsheet size={16} />
-                  )}
-                  Import {importData.length > 0 ? `(${importData.length})` : ""}
-                </button>
-              </div>
+                Import {importData.length > 0 ? `(${importData.length})` : ""}
+              </button>
             </div>
           </motion.div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

@@ -91,7 +91,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isLoaded) loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 
   const loadProfile = async () => {
@@ -123,7 +122,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Drag-to-focus on profile image
   useEffect(() => {
     const el = avatarRef.current;
     if (!el || !profileImageUrl) return;
@@ -256,7 +254,7 @@ export default function ProfilePage() {
   if (!isLoaded || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -268,33 +266,27 @@ export default function ProfilePage() {
 
   return (
     <>
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+    <div className="page-enter max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your account settings</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your account settings</p>
         </div>
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={15} /> Back
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8">
-        {/* Profile card */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden"
-        >
-          <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400 rounded-t-2xl" />
-          <div className="p-8 text-center">
+      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="p-6 text-center">
             <div className="relative inline-block mb-4">
               <div
                 ref={avatarRef}
-                className={`w-28 h-28 rounded-full bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center overflow-hidden ring-4 ring-white dark:ring-gray-900 ${profileImageUrl ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""} select-none`}
+                className={`w-28 h-28 rounded-full bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center overflow-hidden ring-4 ring-white dark:ring-gray-900 ${profileImageUrl ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""} select-none`}
                 title={profileImageUrl ? "Drag to adjust focus" : ""}
               >
                 {profileImageUrl ? (
@@ -318,38 +310,32 @@ export default function ProfilePage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 transition-colors shadow-lg disabled:opacity-50"
+                className="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 transition-colors shadow-lg disabled:opacity-50"
               >
                 {isUploading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Camera size={15} />
+                  <Camera size={14} />
                 )}
               </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoUpload}
-              />
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             </div>
 
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
               {user?.fullName || "User"}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{primaryEmail}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{primaryEmail}</p>
 
-            <div className="my-6 border-t border-gray-200 dark:border-gray-800" />
+            <div className="my-5 border-t border-gray-100 dark:border-gray-800" />
 
-            <div className="space-y-3 text-sm text-left">
+            <div className="space-y-3 text-xs text-left">
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 dark:text-gray-400">Role</span>
                 <span className="font-medium text-gray-800 dark:text-gray-200">Teacher</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 dark:text-gray-400">
-                  <Calendar size={14} className="inline mr-1" />
+                  <Calendar size={13} className="inline mr-1" />
                   Member since
                 </span>
                 <span className="font-medium text-gray-800 dark:text-gray-200">
@@ -358,7 +344,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 dark:text-gray-400">
-                  <Clock size={14} className="inline mr-1" />
+                  <Clock size={13} className="inline mr-1" />
                   Last sign in
                 </span>
                 <span className="font-medium text-gray-800 dark:text-gray-200">
@@ -367,61 +353,49 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="my-6 border-t border-gray-200 dark:border-gray-800" />
+            <div className="my-5 border-t border-gray-100 dark:border-gray-800" />
 
             <button
               onClick={() => signOut()}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors text-sm font-medium"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-sm font-medium"
             >
-              <LogOut size={16} /> Sign out
+              <LogOut size={15} /> Sign out
             </button>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Personal info card */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden"
-        >
-          <div className="h-1 bg-gradient-to-r from-accent-400 to-brand-400" />
-          <div className="p-8">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-5">
               Personal Information
             </h2>
 
-            <div className="max-w-md space-y-5">
+            <div className="max-w-md space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    First name
-                  </label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">First name</label>
                   <input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all placeholder:text-gray-400"
                     placeholder="First name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Last name
-                  </label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Last name</label>
                   <input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all placeholder:text-gray-400"
                     placeholder="Last name"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Email
-                </label>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm cursor-not-allowed">
-                  <Mail size={16} />
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Email</label>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm cursor-not-allowed">
+                  <Mail size={14} />
                   {primaryEmail}
                 </div>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -432,37 +406,33 @@ export default function ProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors text-sm font-medium disabled:opacity-50"
+                className="flex items-center gap-1.5 px-5 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium disabled:opacity-50"
               >
                 {isSaving ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Save size={16} />
+                  <Save size={14} />
                 )}
                 Save changes
               </button>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
 
     {showCropModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-md mx-4 overflow-hidden"
+          className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-md overflow-hidden"
         >
-          <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400" />
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Adjust your photo</h2>
-              <button
-                onClick={handleCropCancel}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400"
-              >
-                <X size={18} />
+              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Adjust your photo</h2>
+              <button onClick={handleCropCancel} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400">
+                <X size={16} />
               </button>
             </div>
 
@@ -502,7 +472,7 @@ export default function ProfilePage() {
                 onClick={() => setCropZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}
                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
               >
-                <Minus size={16} />
+                <Minus size={15} />
               </button>
               <input
                 type="range"
@@ -512,18 +482,12 @@ export default function ProfilePage() {
                 value={cropZoom}
                 onChange={(e) => setCropZoom(parseFloat(e.target.value))}
                 className="flex-1 h-1.5 rounded-full appearance-none bg-gray-200 dark:bg-gray-700 accent-brand-600 cursor-pointer"
-                style={{
-                  WebkitAppearance: "none",
-                  height: "6px",
-                  borderRadius: "3px",
-                  background: `linear-gradient(to right, #6366f1 ${((cropZoom - 1) / 2) * 100}%, #e5e7eb ${((cropZoom - 1) / 2) * 100}%)`,
-                }}
               />
               <button
                 onClick={() => setCropZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))}
                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
               >
-                <Plus size={16} />
+                <Plus size={15} />
               </button>
             </div>
 
@@ -534,13 +498,13 @@ export default function ProfilePage() {
             <div className="flex gap-3">
               <button
                 onClick={handleCropCancel}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCropSave}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-brand-600 text-white hover:bg-brand-700 transition-colors text-sm font-medium"
+                className="flex-1 px-4 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors text-sm font-medium"
               >
                 Save
               </button>
@@ -550,7 +514,6 @@ export default function ProfilePage() {
       </div>
     )}
 
-    {/* Global listeners for crop drag */}
     {showCropModal && (
       <CropDragListeners
         isDragging={isCropDragging}
@@ -585,9 +548,7 @@ function CropDragListeners({ isDragging, setIsDragging, cropPos, setCropPos, cro
       });
     };
 
-    const onEnd = () => {
-      setIsDragging(false);
-    };
+    const onEnd = () => setIsDragging(false);
 
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onEnd);

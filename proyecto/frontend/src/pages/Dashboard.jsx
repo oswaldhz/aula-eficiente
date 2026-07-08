@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useFetch } from "../api";
 import { usePeriod } from "../context/PeriodContext";
 import {
   BookOpen, Users, ClipboardList, GraduationCap,
-  Calendar, TrendingUp, ArrowRight, Plus, School
+  Calendar, ArrowRight, Plus, School, TrendingUp
 } from "lucide-react";
+import StatsCard from "../components/ui/StatsCard";
+import PageHeader from "../components/ui/PageHeader";
 
 const statCards = [
-  { key: "classrooms", label: "Classrooms", icon: BookOpen, color: "blue", link: "/classrooms", gradient: "from-blue-500 to-indigo-500", bg: "bg-blue-50 dark:bg-blue-950" },
-  { key: "students", label: "Students", icon: Users, color: "green", link: "/students", gradient: "from-emerald-500 to-green-600", bg: "bg-emerald-50 dark:bg-emerald-950" },
-  { key: "activities", label: "Activities", icon: ClipboardList, color: "orange", link: "/activities", gradient: "from-amber-500 to-orange-600", bg: "bg-amber-50 dark:bg-amber-950" },
-  { key: "grades", label: "Grades", icon: GraduationCap, color: "purple", link: "/grades", gradient: "from-purple-500 to-violet-600", bg: "bg-purple-50 dark:bg-purple-950" },
+  { key: "classrooms", label: "Classrooms", icon: BookOpen, link: "/classrooms" },
+  { key: "students", label: "Students", icon: Users, link: "/students" },
+  { key: "activities", label: "Activities", icon: ClipboardList, link: "/activities" },
+  { key: "grades", label: "Grades", icon: GraduationCap, link: "/grades" },
 ];
 
 export default function Dashboard() {
@@ -50,142 +51,110 @@ export default function Dashboard() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Overview of your academic period</p>
-      </div>
+    <div className="page-enter">
+      <PageHeader
+        title="Dashboard"
+        subtitle="Overview of your academic period"
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {statCards.map((s, i) => (
-          <motion.div
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {statCards.map((s) => (
+          <StatsCard
             key={s.key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -4 }}
-          >
-            <Link to={s.link} className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all overflow-hidden">
-              <div className={`h-1 bg-gradient-to-r ${s.gradient}`} />
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{s.label}</p>
-                    {isLoading ? (
-                      <div className="h-9 w-16 mt-1 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                    ) : (
-                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{stats[s.key]}</p>
-                    )}
-                  </div>
-                  <div className={`p-3 rounded-xl ${s.bg}`}>
-                    <s.icon size={22} className={`text-${s.color}-600 dark:text-${s.color}-400`} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mt-4 text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors">
-                  View details <ArrowRight size={12} />
-                </div>
-              </div>
-            </Link>
-          </motion.div>
+            label={s.label}
+            value={stats[s.key]}
+            icon={s.icon}
+            href={s.link}
+            loading={isLoading}
+          />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent activities */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-brand-400 to-accent-400 rounded-t-2xl" />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <Calendar size={20} className="text-brand-500" /> Recent Activities
-                </h2>
-                <Link to="/activities" className="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium flex items-center gap-1">
-                  View all <ArrowRight size={14} />
-                </Link>
-              </div>
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              ) : recentActivities.length > 0 ? (
-                <div className="space-y-2">
-                  {recentActivities.map((a, i) => (
-                    <motion.div
-                      key={a.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-colors cursor-default"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{a.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          Due: {a.due_date ? new Date(a.due_date).toLocaleDateString() : "N/A"}
-                        </p>
-                      </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">
-                        {a.max_score} pts
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <ClipboardList size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400">No activities registered</p>
-                  <Link to="/activities" className="inline-flex items-center gap-1 mt-3 text-sm text-brand-600 dark:text-brand-400 font-medium">
-                    <Plus size={14} /> Create activity
-                  </Link>
-                </div>
-              )}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Calendar size={16} className="text-brand-500" />
+                Recent Activities
+              </h2>
+              <Link
+                to="/activities"
+                className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium flex items-center gap-1"
+              >
+                View all <ArrowRight size={12} />
+              </Link>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Quick actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-accent-400 to-brand-400" />
-            <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-5">Quick Actions</h2>
-              <div className="space-y-3">
-                {[
-                  { to: "/classrooms", icon: School, label: "Manage Classrooms", desc: "Create and organize your classrooms" },
-                  { to: "/students", icon: Users, label: "Manage Students", desc: "Add students and import from Excel" },
-                  { to: "/grades", icon: GraduationCap, label: "Grade Activities", desc: "Evaluate student submissions" },
-                  { to: "/reports", icon: TrendingUp, label: "Generate Reports", desc: "Export PDF or Excel reports" },
-                ].map((item, i) => (
-                  <motion.div key={i} whileHover={{ x: 4 }}>
-                    <Link
-                      to={item.to}
-                      className="flex items-start gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-800 hover:bg-brand-50/50 dark:hover:bg-brand-950/20 transition-all"
-                    >
-                      <div className="p-2.5 rounded-lg bg-brand-50 dark:bg-brand-900/50">
-                        <item.icon size={20} className="text-brand-600 dark:text-brand-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{item.label}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
-                      </div>
-                    </Link>
-                  </motion.div>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-14 skeleton rounded-lg" />
                 ))}
               </div>
+            ) : recentActivities.length > 0 ? (
+              <div className="space-y-1">
+                {recentActivities.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{a.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Due: {a.due_date ? new Date(a.due_date).toLocaleDateString() : "N/A"}
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
+                      {a.max_score} pts
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <ClipboardList size={36} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">No activities registered</p>
+                <Link
+                  to="/activities"
+                  className="inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 font-medium"
+                >
+                  <Plus size={12} /> Create activity
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div className="p-5">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              Quick Actions
+            </h2>
+            <div className="space-y-2">
+              {[
+                { to: "/classrooms", icon: School, label: "Manage Classrooms", desc: "Create and organize your classrooms" },
+                { to: "/students", icon: Users, label: "Manage Students", desc: "Add students and import from Excel" },
+                { to: "/grades", icon: GraduationCap, label: "Grade Activities", desc: "Evaluate student submissions" },
+                { to: "/reports", icon: TrendingUp, label: "Generate Reports", desc: "Export PDF or Excel reports" },
+              ].map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-brand-200 dark:hover:border-brand-800 hover:bg-brand-50/50 dark:hover:bg-brand-900/20 transition-all"
+                >
+                  <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400">
+                    <item.icon size={16} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{item.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
