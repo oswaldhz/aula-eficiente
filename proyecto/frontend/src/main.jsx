@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./components/Toast";
+import { Provider as TooltipProvider } from "./components/ui/Tooltip";
 import App from "./App";
 import "./index.css";
 
@@ -29,11 +30,13 @@ if (!PUBLISHABLE_KEY) {
     <React.StrictMode>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <ThemeProvider>
+          <TooltipProvider>
           <ToastProvider>
           <BrowserRouter>
             <App />
           </BrowserRouter>
           </ToastProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </ClerkProvider>
     </React.StrictMode>
