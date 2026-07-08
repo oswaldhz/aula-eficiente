@@ -4,6 +4,7 @@ import { Plus, Calendar, Edit3, Trash2, Clock, MoreVertical } from "lucide-react
 import PageHeader from "../components/ui/PageHeader";
 import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
 import { usePeriod } from "../context/PeriodContext";
@@ -18,6 +19,7 @@ export default function PeriodsPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", year: "" });
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -39,9 +41,10 @@ export default function PeriodsPage() {
     setSaving(false); setModalOpen(false); loadData(); triggerRefresh();
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this period?")) return;
-    await deleteData(`periods/${id}`); loadData(); triggerRefresh();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteData(`periods/${deleteTarget}`); loadData(); triggerRefresh();
+    setDeleteTarget(null);
   };
 
   const filtered = periods.filter((p) => p.name?.toLowerCase().includes(search.toLowerCase()) || String(p.year).includes(search));
@@ -73,7 +76,7 @@ export default function PeriodsPage() {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item onClick={() => openEdit(per)}><Edit3 size={14} /> Edit</DropdownMenu.Item>
-                      <DropdownMenu.Item onClick={() => handleDelete(per.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
+                      <DropdownMenu.Item onClick={() => setDeleteTarget(per.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </div>
@@ -99,6 +102,14 @@ export default function PeriodsPage() {
           </div>
         </div>
       </CrudModal>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        title="Delete period"
+        message="Are you sure you want to delete this period? All classrooms, students, activities, and grades associated with it will be permanently removed."
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 import PageHeader from "../components/ui/PageHeader";
 import { EmptyState } from "../components/ui/DataGrid";
 import * as Select from "../components/ui/Select";
+import NoPeriodGuide from "../components/NoPeriodGuide";
 
 export default function GradesPage() {
   const { fetchData, postData, putData } = useFetch();
@@ -91,6 +92,8 @@ export default function GradesPage() {
   return (
     <div className="page-enter">
       <PageHeader title="Grades" subtitle="Grade student activities" />
+
+      <NoPeriodGuide />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Select.Root value={selectedClassroom} onValueChange={setSelectedClassroom}>

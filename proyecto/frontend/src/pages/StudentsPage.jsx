@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import PageHeader from "../components/ui/PageHeader";
 import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import NoPeriodGuide from "../components/NoPeriodGuide";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
 import * as Select from "../components/ui/Select";
@@ -22,6 +24,7 @@ export default function StudentsPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", identifier: "", classroom_id: "" });
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importData, setImportData] = useState([]);
   const [importClassroom, setImportClassroom] = useState("");
@@ -54,9 +57,10 @@ export default function StudentsPage() {
     setSaving(false); setModalOpen(false); loadData();
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this student?")) return;
-    await deleteData(`students/${id}`); loadData();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteData(`students/${deleteTarget}`); loadData();
+    setDeleteTarget(null);
   };
 
   const downloadTemplate = () => {
@@ -114,6 +118,8 @@ export default function StudentsPage() {
         </>
       } />
 
+      <NoPeriodGuide />
+
       <SearchFilter value={search} onChange={setSearch} placeholder="Search students..." filters={
         <Select.Root value={classroomFilter} onValueChange={setClassroomFilter}>
           <Select.Trigger placeholder="All classrooms" className="w-44" />
@@ -147,7 +153,7 @@ export default function StudentsPage() {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item onClick={() => openEdit(stu)}><Edit3 size={14} /> Edit</DropdownMenu.Item>
-                      <DropdownMenu.Item onClick={() => handleDelete(stu.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
+                      <DropdownMenu.Item onClick={() => setDeleteTarget(stu.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </div>
@@ -186,6 +192,14 @@ export default function StudentsPage() {
           </div>
         </div>
       </CrudModal>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        title="Delete student"
+        message="Are you sure you want to delete this student? Their grades and records will be permanently removed."
+        onConfirm={handleDelete}
+      />
 
       {importOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">

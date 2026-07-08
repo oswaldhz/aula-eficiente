@@ -5,6 +5,8 @@ import { Plus, School, Edit3, Trash2, BookOpen, MoreVertical } from "lucide-reac
 import PageHeader from "../components/ui/PageHeader";
 import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import NoPeriodGuide from "../components/NoPeriodGuide";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
 import * as Select from "../components/ui/Select";
@@ -19,6 +21,7 @@ export default function ClassroomsPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", description: "", period_id: "" });
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { periodId } = usePeriod();
 
   useEffect(() => { loadData(); }, [periodId]);
@@ -50,9 +53,10 @@ export default function ClassroomsPage() {
     setSaving(false); setModalOpen(false); loadData();
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this classroom?")) return;
-    await deleteData(`classrooms/${id}`); loadData();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteData(`classrooms/${deleteTarget}`); loadData();
+    setDeleteTarget(null);
   };
 
   const filtered = classrooms.filter((c) => c.name?.toLowerCase().includes(search.toLowerCase()) || c.description?.toLowerCase().includes(search.toLowerCase()));
@@ -66,6 +70,8 @@ export default function ClassroomsPage() {
       } />
 
       <SearchFilter value={search} onChange={setSearch} placeholder="Search classrooms..." />
+
+      <NoPeriodGuide />
 
       {isLoading ? <SkeletonGrid /> : filtered.length > 0 ? (
         <CardGrid>
@@ -92,7 +98,7 @@ export default function ClassroomsPage() {
                       <DropdownMenu.Item onClick={() => openEdit(cls)}>
                         <Edit3 size={14} /> Edit
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item onClick={() => handleDelete(cls.id)} danger>
+                      <DropdownMenu.Item onClick={() => setDeleteTarget(cls.id)} danger>
                         <Trash2 size={14} /> Delete
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
@@ -134,6 +140,14 @@ export default function ClassroomsPage() {
           </div>
         </div>
       </CrudModal>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        title="Delete classroom"
+        message="Are you sure you want to delete this classroom? All students and activities associated with it will be affected."
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

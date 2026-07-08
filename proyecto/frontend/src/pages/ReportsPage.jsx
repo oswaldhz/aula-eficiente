@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useFetch } from "../api";
 import { usePeriod } from "../context/PeriodContext";
 import * as Select from "../components/ui/Select";
+import NoPeriodGuide from "../components/NoPeriodGuide";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import { autoTable } from "jspdf-autotable";
 import {
   FileText, FileSpreadsheet, Download, TrendingUp
 } from "lucide-react";
@@ -81,7 +82,7 @@ export default function ReportsPage() {
     doc.text(`Classroom: ${selectedClassroomData?.name || ""}`, 14, 28);
     doc.text(`Activity: ${selectedActivityData?.title || ""}`, 14, 34);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 40);
-    doc.autoTable({
+    autoTable(doc, {
       startY: 46,
       head: [["Student", "ID", "Activity", "Score", "Max", "Classroom"]],
       body: reportRows.map((r) => [r.name, r.identifier, r.activity, r.score, r.max, r.classroom]),
@@ -101,6 +102,8 @@ export default function ReportsPage() {
   return (
     <div className="page-enter">
       <PageHeader title="Reports" subtitle="Export grades to PDF or Excel" />
+
+      <NoPeriodGuide />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Select.Root value={selectedClassroom} onValueChange={setSelectedClassroom}>

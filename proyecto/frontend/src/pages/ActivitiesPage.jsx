@@ -5,6 +5,8 @@ import { Plus, ClipboardList, Edit3, Trash2, Calendar, Target, MoreVertical } fr
 import PageHeader from "../components/ui/PageHeader";
 import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import NoPeriodGuide from "../components/NoPeriodGuide";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
 import * as Select from "../components/ui/Select";
@@ -20,6 +22,7 @@ export default function ActivitiesPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", due_date: "", max_score: "", classroom_id: "" });
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { periodId } = usePeriod();
 
   useEffect(() => { loadData(); }, [periodId]);
@@ -43,9 +46,10 @@ export default function ActivitiesPage() {
     setSaving(false); setModalOpen(false); loadData();
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this activity?")) return;
-    await deleteData(`activities/${id}`); loadData();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteData(`activities/${deleteTarget}`); loadData();
+    setDeleteTarget(null);
   };
 
   const filtered = activities.filter((a) => {
@@ -59,6 +63,8 @@ export default function ActivitiesPage() {
       <PageHeader title="Activities" subtitle="Manage your activities" actions={
         <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"><Plus size={15} /> Add</button>
       } />
+
+      <NoPeriodGuide />
 
       <SearchFilter value={search} onChange={setSearch} placeholder="Search activities..." filters={
         <Select.Root value={classroomFilter} onValueChange={setClassroomFilter}>
@@ -89,7 +95,7 @@ export default function ActivitiesPage() {
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item onClick={() => openEdit(act)}><Edit3 size={14} /> Edit</DropdownMenu.Item>
-                      <DropdownMenu.Item onClick={() => handleDelete(act.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
+                      <DropdownMenu.Item onClick={() => setDeleteTarget(act.id)} danger><Trash2 size={14} /> Delete</DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu.Root>
                 </div>
@@ -139,6 +145,14 @@ export default function ActivitiesPage() {
           </div>
         </div>
       </CrudModal>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        title="Delete activity"
+        message="Are you sure you want to delete this activity? All associated grades will be permanently removed."
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
