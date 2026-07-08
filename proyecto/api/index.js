@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY || "",
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY || "",
 });
 
 app.use(cors({
@@ -72,24 +73,23 @@ function snapshotToObject(snapshot) {
 }
 
 async function getTeacherIdFromToken(req) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return null;
-
-  const parts = authHeader.split(" ");
-  if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") return null;
-
-  const token = parts[1];
   try {
-    const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host;
-    const origin = req.headers.origin || (host ? `${proto}://${host}` : undefined);
-    const authorizedParties = [origin, process.env.CLERK_ALLOWED_AZP].filter(Boolean);
+    const requestState = await clerkClient.authenticateRequest(
+      {
+        url: req.url,
+        method: req.method,
+        headers: Object.fromEntries(
+          Object.entries(req.headers).map(([k, v]) => [k.toLowerCase(), Array.isArray(v) ? v.join(", ") : v])
+        ),
+      },
+      { publishableKey: process.env.CLERK_PUBLISHABLE_KEY || "" }
+    );
 
-    const decoded = await clerkClient.verifyToken(token, {
-      jwtKey: process.env.CLERK_JWT_KEY,
-      authorizedParties: authorizedParties.length > 0 ? authorizedParties : undefined,
-    });
-    return decoded.sub;
+    if (!requestState.isSignedIn) {
+      return null;
+    }
+
+    return requestState.toAuth().userId;
   } catch {
     return null;
   }
