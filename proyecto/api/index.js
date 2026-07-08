@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { Webhook } = require("svix");
-const { createClerkClient } = require("@clerk/backend");
+const { createClerkClient, verifyToken } = require("@clerk/backend");
 const { admin, db, isFirebaseReady, getFirebaseError } = require("../lib/firebase");
 
 const app = express();
@@ -84,18 +84,15 @@ const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, ne
 async function getTeacherIdFromToken(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  const token = authHeader.slice(7);
   try {
-    const url = `${req.protocol || "https"}://${req.headers.host || "localhost"}${req.originalUrl || req.url}`;
-    const headers = new Headers();
-    for (const [k, v] of Object.entries(req.headers)) {
-      if (v) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
-    }
-    const webReq = new Request(url, { method: req.method, headers });
-    const state = await clerkClient.authenticateRequest(webReq);
-    if (!state.isAuthenticated) return null;
-    return state.toAuth().userId;
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+      authorizedParties: ["https://aula-eficiente-o6xh.vercel.app"],
+    });
+    return payload.sub;
   } catch (e) {
-    console.error("Clerk auth error:", e?.errors || e?.message || e);
+    console.error("Clerk verifyToken error:", e?.errors || e?.message || e);
     return null;
   }
 }
@@ -148,18 +145,13 @@ app.get("/api/debug-auth", async (req, res) => {
     const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8"));
     let verifyResult = null, verifyError = null;
     try {
-      const url = `${req.protocol || "https"}://${req.headers.host || "localhost"}${req.originalUrl || req.url}`;
-      const webHeaders = new Headers();
-      for (const [k, v] of Object.entries(req.headers)) {
-        if (v) webHeaders.set(k, Array.isArray(v) ? v.join(", ") : v);
-      }
-      const webReq = new Request(url, { method: req.method, headers: webHeaders });
-      const state = await clerkClient.authenticateRequest(webReq);
-      let stateDetails = JSON.stringify({ isAuthenticated: state.isAuthenticated, reason: state.reason, message: state.message, status: state.status, isHandshake: state.isHandshake, isInterstitial: state.isInterstitial, headers: Object.keys(Object.fromEntries(webHeaders)), url });
-      verifyResult = state.isAuthenticated ? { sub: state.toAuth().userId } : null;
-      if (!state.isAuthenticated) verifyError = stateDetails;
+      const payload = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY,
+        authorizedParties: ["https://aula-eficiente-o6xh.vercel.app"],
+      });
+      verifyResult = { sub: payload.sub, email: payload.email };
     } catch (e) {
-      verifyError = e?.errors || e?.message || String(e);
+      verifyError = e?.errors ? JSON.stringify(e.errors) : e?.message || String(e);
     }
     return res.json({
       payload,
