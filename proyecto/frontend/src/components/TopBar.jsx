@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useUser, useClerk, useAuth } from "@clerk/clerk-react";
@@ -14,29 +14,28 @@ export default function TopBar({ periodSelector, onMenuToggle }) {
   const navigate = useNavigate();
   const [profileImageUrl, setProfileImageUrl] = useState("");
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const token = await getToken();
-      if (!token) return;
-      const res = await fetchWithToken("teachers/profile", token);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.profile_image_url) {
-          setProfileImageUrl(
-            data.profile_image_url.startsWith("http")
-              ? data.profile_image_url
-              : `${BASE_URL}${data.profile_image_url}`
-          );
-        }
-      }
-    } catch {}
-  }, [getToken]);
-
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetchWithToken("teachers/profile", token);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.profile_image_url) {
+            setProfileImageUrl(
+              data.profile_image_url.startsWith("http")
+                ? data.profile_image_url
+                : `${BASE_URL}${data.profile_image_url}`
+            );
+          }
+        }
+      } catch {}
+    };
     fetchProfile();
     window.addEventListener("profile-updated", fetchProfile);
     return () => window.removeEventListener("profile-updated", fetchProfile);
-  }, [fetchProfile]);
+  }, [getToken]);
 
   return (
     <header className="h-14 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:px-6">

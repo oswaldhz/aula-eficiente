@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader";
 import { EmptyState } from "../components/ui/DataGrid";
+import * as Select from "../components/ui/Select";
 
 export default function GradesPage() {
   const { fetchData, postData, putData } = useFetch();
@@ -92,27 +93,22 @@ export default function GradesPage() {
       <PageHeader title="Grades" subtitle="Grade student activities" />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <select
-          value={selectedClassroom}
-          onChange={(e) => setSelectedClassroom(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all"
-        >
-          <option value="">Select a classroom</option>
-          {classrooms.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <select
-          value={selectedActivity}
-          onChange={(e) => setSelectedActivity(e.target.value)}
-          disabled={!selectedClassroom}
-          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all disabled:opacity-50"
-        >
-          <option value="">Select an activity</option>
-          {activities.map((a) => (
-            <option key={a.id} value={a.id}>{a.title}</option>
-          ))}
-        </select>
+        <Select.Root value={selectedClassroom} onValueChange={setSelectedClassroom}>
+          <Select.Trigger placeholder="Select a classroom" className="flex-1" />
+          <Select.Content>
+            {classrooms.map((c) => (
+              <Select.Item key={c.id} value={c.id}>{c.name}</Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+        <Select.Root value={selectedActivity} onValueChange={setSelectedActivity}>
+          <Select.Trigger placeholder="Select an activity" className="flex-1" disabled={!selectedClassroom} />
+          <Select.Content>
+            {activities.map((a) => (
+              <Select.Item key={a.id} value={a.id}>{a.title}</Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
       </div>
 
       {!selectedClassroom || !selectedActivity ? (
