@@ -77,6 +77,8 @@ function snapshotToObject(snapshot) {
   return { id: snapshot.key, ...val };
 }
 
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
 async function getTeacherIdFromToken(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
@@ -145,33 +147,23 @@ app.get("/api/debug-auth", async (req, res) => {
   }
 });
 
-app.use(async (req, res, next) => {
+app.use(asyncHandler(async (req, res, next) => {
   if (req.method === "OPTIONS") return next();
   if (req.path === "/api/clerk-webhook") return next();
-  if (req.path === "/api/debug-env" || req.path === "/api/debug-auth") return next();
   if (!isFirebaseReady()) {
-    return res.status(500).json({ error: "Firebase not initialized", _debug: { CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? "set" : "NOT SET", FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "set" : "NOT SET" } });
+    return res.status(500).json({ error: "Firebase not initialized" });
   }
 
   const clerkUserId = await getTeacherIdFromToken(req);
   if (!clerkUserId) {
-    return res.status(401).json({
-      error: "Unauthorized: invalid token",
-      _debug: {
-        CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? `set (len=${process.env.CLERK_SECRET_KEY.length})` : "NOT SET",
-        CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
-        hasAuthHeader: !!req.headers.authorization,
-        authHeaderPrefix: req.headers.authorization ? req.headers.authorization.slice(0, 15) + "..." : null,
-        node: process.version,
-      },
-    });
+    return res.status(401).json({ error: "Unauthorized: invalid token" });
   }
 
   const teacher = await ensureTeacherExists(clerkUserId);
   req.teacher = teacher;
   req.teacherId = clerkUserId;
   next();
-});
+}));
 
 app.get("/api/test-teacher", (req, res) => {
   res.json({
