@@ -7,10 +7,15 @@ const { admin, db } = require("../lib/firebase");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY || "",
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY || "",
-});
+let clerkClient;
+try {
+  clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY || "",
+  });
+} catch (e) {
+  console.error("Failed to create Clerk client:", e);
+  clerkClient = null;
+}
 
 app.use(cors({
   origin: true,
