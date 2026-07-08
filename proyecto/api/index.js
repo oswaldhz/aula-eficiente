@@ -73,24 +73,14 @@ function snapshotToObject(snapshot) {
 }
 
 async function getTeacherIdFromToken(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  const token = authHeader.slice(7);
   try {
-    const requestState = await clerkClient.authenticateRequest(
-      {
-        url: req.url,
-        method: req.method,
-        headers: Object.fromEntries(
-          Object.entries(req.headers).map(([k, v]) => [k.toLowerCase(), Array.isArray(v) ? v.join(", ") : v])
-        ),
-      },
-      { publishableKey: process.env.CLERK_PUBLISHABLE_KEY || "" }
-    );
-
-    if (!requestState.isSignedIn) {
-      return null;
-    }
-
-    return requestState.toAuth().userId;
-  } catch {
+    const decoded = await clerkClient.verifyToken(token);
+    return decoded.sub;
+  } catch (e) {
+    console.error("Clerk verifyToken error:", e?.errors || e?.message || e);
     return null;
   }
 }
@@ -117,24 +107,22 @@ app.get("/api/debug-auth", async (req, res) => {
 
   const token = header.startsWith("Bearer ") ? header.slice(7) : header;
   const parts = token.split(".");
-  if (parts.length !== 3) return res.json({ error: "Not a valid JWT", preview: token.slice(0, 30) });
+  if (parts.length !== 3) return res.json({ error: "Not a valid JWT" });
 
   try {
     const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8"));
-    const verrs = [];
-    let verResult = null;
+    let verifyResult = null, verifyError = null;
     try {
-      verResult = await clerkClient.verifyToken(token, { jwtKey: process.env.CLERK_JWT_KEY });
+      verifyResult = await clerkClient.verifyToken(token);
     } catch (e) {
-      verrs.push(e.message || String(e));
+      verifyError = e?.errors || e?.message || String(e);
     }
     return res.json({
       payload,
-      issuerExpected: `https://${payload.iss || "clerk.unknown"}`,
       azp: payload.azp,
-      authorizedParties: [req.headers.origin, req.headers.host && `https://${req.headers.host}`, process.env.CLERK_ALLOWED_AZP].filter(Boolean),
-      authenticateRequestError: verrs,
-      authenticateRequestResult: verResult ? { sub: verResult.sub } : null,
+      iss: payload.iss,
+      verifyResult: verifyResult ? { sub: verifyResult.sub } : null,
+      verifyError,
     });
   } catch (e) {
     return res.json({ error: e.message });
