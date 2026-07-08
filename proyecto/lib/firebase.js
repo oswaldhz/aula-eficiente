@@ -5,7 +5,7 @@ let db = null;
 
 try {
   if (!admin.apps.length) {
-    const key = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+    const key = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/^["']|["']$/g, "").replace(/\\n/g, "\n");
     const dbUrl = (process.env.FIREBASE_DATABASE_URL || "").replace(/^["']|["']$/g, "");
     const projectId = (process.env.FIREBASE_PROJECT_ID || "").replace(/^["']|["']$/g, "");
     const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || "").replace(/^["']|["']$/g, "");
