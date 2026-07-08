@@ -4,6 +4,16 @@ const { createClerkClient } = require("@clerk/backend");
 const { db, isFirebaseReady } = require("../lib/firebase");
 const multer = require("multer");
 const { asyncHandler, getTeacherIdFromToken, ensureTeacherExists } = require("./middleware/auth");
+const { validateEnv } = require("./lib/env");
+
+const missing = validateEnv();
+if (missing.length > 0) {
+  console.warn("Missing required environment variables:\n  - " + missing.join("\n  - "));
+  if (process.env.NODE_ENV === "production") {
+    console.error("Fatal: missing required env vars in production");
+    process.exit(1);
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;

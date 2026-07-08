@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { SignedIn, SignedOut, RedirectToSignIn, useAuth } from "@clerk/clerk-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BASE_URL } from "./api";
 import { PeriodProvider, usePeriod } from "./context/PeriodContext";
+
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
 
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -90,8 +93,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <PeriodProvider>
-      <AppContent />
-    </PeriodProvider>
+    <QueryClientProvider client={queryClient}>
+      <PeriodProvider>
+        <AppContent />
+      </PeriodProvider>
+    </QueryClientProvider>
   );
 }

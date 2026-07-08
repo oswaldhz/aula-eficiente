@@ -1,22 +1,46 @@
 {
   "rules": {
     "teachers": {
-      ".indexOn": ["teacher_id"]
+      ".indexOn": ["teacher_id"],
+      "$teacherId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     },
     "periods": {
-      ".indexOn": ["teacher_id"]
+      ".indexOn": ["teacher_id"],
+      "$periodId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     },
     "classrooms": {
-      ".indexOn": ["teacher_id", "period_id"]
+      ".indexOn": ["teacher_id", "period_id"],
+      "$classroomId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     },
     "students": {
-      ".indexOn": ["teacher_id", "classroom_id"]
+      ".indexOn": ["teacher_id", "classroom_id"],
+      "$studentId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     },
     "activities": {
-      ".indexOn": ["teacher_id", "classroom_id"]
+      ".indexOn": ["teacher_id", "classroom_id"],
+      "$activityId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     },
     "grades": {
-      ".indexOn": ["teacher_id", "activity_id", "student_id"]
+      ".indexOn": ["teacher_id", "activity_id", "student_id"],
+      "$gradeId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     }
   }
 }

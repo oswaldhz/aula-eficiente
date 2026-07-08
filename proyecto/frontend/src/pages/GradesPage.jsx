@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
 import { usePeriod } from "../context/PeriodContext";
@@ -79,7 +79,7 @@ export default function GradesPage() {
     const scoreValue = Number(scores[studentId]);
     if (isNaN(scoreValue)) return;
     setSavingId(studentId);
-    const existing = grades.find((g) => g.student_id === studentId);
+    const existing = gradesByStudent[studentId];
     const payload = {
       student_id: studentId,
       activity_id: selectedActivity,
@@ -94,7 +94,12 @@ export default function GradesPage() {
     loadStudentsAndGrades();
   };
 
-  const hasGrade = (studentId) => grades.some((g) => g.student_id === studentId);
+  const gradedIds = useMemo(() => new Set(grades.map(g => g.student_id)), [grades]);
+  const gradesByStudent = useMemo(() => {
+    const map = {};
+    for (const g of grades) map[g.student_id] = g;
+    return map;
+  }, [grades]);
 
   const selectedActivityData = activities.find((a) => String(a.id) === String(selectedActivity));
 
@@ -193,7 +198,7 @@ export default function GradesPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  {hasGrade(stu.id) && (
+                  {gradedIds.has(stu.id) && (
                     <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                       <Check size={12} /> Saved
                     </span>
