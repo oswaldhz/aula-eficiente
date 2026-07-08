@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Webhook } = require("svix");
 const { createClerkClient } = require("@clerk/backend");
-const { admin, db, isFirebaseReady } = require("../lib/firebase");
+const { admin, db, isFirebaseReady, getFirebaseError } = require("../lib/firebase");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -119,6 +119,7 @@ app.get("/api/debug-env", (req, res) => {
     FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? `set (len=${process.env.FIREBASE_PRIVATE_KEY.length})` : "NOT SET",
     isFirebaseReady: isFirebaseReady(),
     dbIsNull: db === null,
+    firebaseError: getFirebaseError(),
     node: process.version,
   });
 });
