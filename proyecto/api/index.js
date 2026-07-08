@@ -90,7 +90,7 @@ async function getTeacherIdFromToken(req) {
   try {
     const payload = await verifyToken(token, {
       secretKey: process.env.CLERK_SECRET_KEY,
-      authorizedParties: ["https://aula-eficiente-o6xh.vercel.app"],
+      authorizedParties: ["https://aula-eficiente.vercel.app"],
     });
     return payload.sub;
   } catch (e) {
@@ -149,7 +149,7 @@ app.get("/api/debug-auth", async (req, res) => {
     try {
       const payload = await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY,
-        authorizedParties: ["https://aula-eficiente-o6xh.vercel.app"],
+        authorizedParties: ["https://aula-eficiente.vercel.app"],
       });
       verifyResult = { sub: payload.sub, email: payload.email };
     } catch (e) {
