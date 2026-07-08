@@ -56,8 +56,32 @@ router.delete("/:periodId", asyncHandler(async (req, res) => {
   const period = snapshotToObject(snap);
   if (!period) return res.status(404).json({ error: "Periodo no encontrado" });
   if (period.teacher_id !== req.teacherId) return res.status(403).json({ error: "Forbidden" });
-  await db.ref(`periods/${req.params.periodId}`).remove();
-  res.json({ id: req.params.periodId, message: "Periodo eliminado" });
+
+  const classroomSnap = await db.ref("classrooms").orderByChild("period_id").equalTo(req.params.periodId).once("value");
+  const classrooms = snapshotToArray(classroomSnap);
+  const ops = [];
+
+  for (const cls of classrooms) {
+    const [studentSnap, activitySnap] = await Promise.all([
+      db.ref("students").orderByChild("classroom_id").equalTo(cls.id).once("value"),
+      db.ref("activities").orderByChild("classroom_id").equalTo(cls.id).once("value"),
+    ]);
+    const students = snapshotToArray(studentSnap);
+    const activities = snapshotToArray(activitySnap);
+
+    for (const stu of students) ops.push(db.ref(`students/${stu.id}`).remove());
+    for (const act of activities) {
+      const gradeSnap = await db.ref("grades").orderByChild("activity_id").equalTo(act.id).once("value");
+      const grades = snapshotToArray(gradeSnap);
+      for (const g of grades) ops.push(db.ref(`grades/${g.id}`).remove());
+      ops.push(db.ref(`activities/${act.id}`).remove());
+    }
+    ops.push(db.ref(`classrooms/${cls.id}`).remove());
+  }
+
+  ops.push(db.ref(`periods/${req.params.periodId}`).remove());
+  await Promise.all(ops);
+  res.json({ id: req.params.periodId, message: "Periodo y datos asociados eliminados" });
 }));
 
 module.exports = router;

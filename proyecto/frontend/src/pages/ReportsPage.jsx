@@ -103,9 +103,8 @@ export default function ReportsPage() {
     <div className="page-enter">
       <PageHeader title="Reports" subtitle="Export grades to PDF or Excel" />
 
-      <NoPeriodGuide />
-
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <NoPeriodGuide>
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Select.Root value={selectedClassroom} onValueChange={setSelectedClassroom}>
           <Select.Trigger placeholder="Select a classroom" className="flex-1" />
           <Select.Content>
@@ -206,6 +205,7 @@ export default function ReportsPage() {
           </div>
         </div>
       )}
+      </NoPeriodGuide>
     </div>
   );
 }

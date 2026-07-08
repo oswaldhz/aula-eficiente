@@ -2,11 +2,11 @@ import { Calendar, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePeriod } from "../context/PeriodContext";
 
-export default function NoPeriodGuide() {
+export default function NoPeriodGuide({ children }) {
   const { periodId } = usePeriod();
   const navigate = useNavigate();
 
-  if (periodId) return null;
+  if (periodId) return children;
 
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

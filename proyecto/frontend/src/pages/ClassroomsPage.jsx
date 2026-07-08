@@ -69,11 +69,10 @@ export default function ClassroomsPage() {
         </button>
       } />
 
-      <SearchFilter value={search} onChange={setSearch} placeholder="Search classrooms..." />
+      <NoPeriodGuide>
+        <SearchFilter value={search} onChange={setSearch} placeholder="Search classrooms..." />
 
-      <NoPeriodGuide />
-
-      {isLoading ? <SkeletonGrid /> : filtered.length > 0 ? (
+        {isLoading ? <SkeletonGrid /> : filtered.length > 0 ? (
         <CardGrid>
           {filtered.map((cls) => (
             <div key={cls.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all relative group">
@@ -116,6 +115,7 @@ export default function ClassroomsPage() {
           </button>
         } />
       )}
+      </NoPeriodGuide>
 
       <CrudModal open={modalOpen} onOpenChange={setModalOpen} title={editing ? "Edit Classroom" : "New Classroom"} onSave={handleSave} saving={saving} saveLabel={editing ? "Update" : "Create"}>
         <div className="space-y-4">

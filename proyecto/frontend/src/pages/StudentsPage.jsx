@@ -118,9 +118,8 @@ export default function StudentsPage() {
         </>
       } />
 
-      <NoPeriodGuide />
-
-      <SearchFilter value={search} onChange={setSearch} placeholder="Search students..." filters={
+      <NoPeriodGuide>
+        <SearchFilter value={search} onChange={setSearch} placeholder="Search students..." filters={
         <Select.Root value={classroomFilter} onValueChange={setClassroomFilter}>
           <Select.Trigger placeholder="All classrooms" className="w-44" />
           <Select.Content>
@@ -170,6 +169,7 @@ export default function StudentsPage() {
           </div>
         } />
       )}
+      </NoPeriodGuide>
 
       <CrudModal open={modalOpen} onOpenChange={setModalOpen} title={editing ? "Edit Student" : "New Student"} onSave={handleSave} saving={saving} saveLabel={editing ? "Update" : "Create"}>
         <div className="space-y-4">

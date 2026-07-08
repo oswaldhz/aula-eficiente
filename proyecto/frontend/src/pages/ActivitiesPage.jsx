@@ -7,6 +7,7 @@ import SearchFilter from "../components/ui/SearchFilter";
 import CrudModal from "../components/ui/CrudModal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import NoPeriodGuide from "../components/NoPeriodGuide";
+import DateInput from "../components/ui/DateInput";
 import { SkeletonGrid, EmptyState, CardGrid } from "../components/ui/DataGrid";
 import * as DropdownMenu from "../components/ui/DropdownMenu";
 import * as Select from "../components/ui/Select";
@@ -64,9 +65,8 @@ export default function ActivitiesPage() {
         <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"><Plus size={15} /> Add</button>
       } />
 
-      <NoPeriodGuide />
-
-      <SearchFilter value={search} onChange={setSearch} placeholder="Search activities..." filters={
+      <NoPeriodGuide>
+        <SearchFilter value={search} onChange={setSearch} placeholder="Search activities..." filters={
         <Select.Root value={classroomFilter} onValueChange={setClassroomFilter}>
           <Select.Trigger placeholder="All classrooms" className="w-44" />
           <Select.Content>
@@ -113,6 +113,7 @@ export default function ActivitiesPage() {
           <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"><Plus size={15} /> Create</button>
         } />
       )}
+      </NoPeriodGuide>
 
       <CrudModal open={modalOpen} onOpenChange={setModalOpen} title={editing ? "Edit Activity" : "New Activity"} onSave={handleSave} saving={saving} saveLabel={editing ? "Update" : "Create"}>
         <div className="space-y-4">
@@ -127,7 +128,7 @@ export default function ActivitiesPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Due Date</label>
-              <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 outline-none transition-all" />
+              <DateInput value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Max Score</label>
