@@ -664,6 +664,11 @@ app.put("/api/teachers/profile", async (req, res) => {
   }
 });
 
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err?.stack || err?.message || err);
+  res.status(500).json({ error: err?.message || "Internal server error", _type: err?.constructor?.name });
+});
+
 app.all("*", (req, res) => {
   res.status(404).json({ error: "Not found" });
 });
