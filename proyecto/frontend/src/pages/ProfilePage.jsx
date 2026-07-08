@@ -210,10 +210,21 @@ export default function ProfilePage() {
     setIsUploading(true);
     try {
       const compressed = await compressImage(file, 512);
-      const updatedUser = await user.setProfileImage(compressed);
-      const newUrl = updatedUser.imageUrl;
-
       const token = await getToken();
+      const formData = new FormData();
+      formData.append("file", compressed, "profile.jpg");
+      const clerkResp = await fetch(
+        `https://proper-mullet-33.clerk.accounts.dev/v1/me/profile_image?__clerk_api_version=2025-11-10`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        }
+      );
+      if (!clerkResp.ok) throw new Error(`Clerk upload failed: ${await clerkResp.text()}`);
+      const clerkData = await clerkResp.json();
+      const newUrl = clerkData.imageUrl;
+
       await fetchWithToken("teachers/profile", token, {
         method: "PUT",
         body: JSON.stringify({ profile_image_url: newUrl }),
