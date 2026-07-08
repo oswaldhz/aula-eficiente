@@ -2,36 +2,45 @@
 node_modules/
 .pnp/
 .pnp.js
-.env/
 
-# testing
-coverage/
-.env/
+# Python
+.venv/
+instance/
+*.db
+
+# environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+proyecto/.env
+proyecto/frontend/.env
+proyecto/frontend/.env.development
+proyecto/frontend/.env.production
+proyecto/api/.env
+
+# screenshots (keep only in README if needed)
+*.png
+*.jpg
+*.jpeg
+*.gif
 
 # production
 build/
 dist/
 out/
-.env/
 
 # misc
 .DS_Store
-.env.local
-.env.*.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.idea
 *.log
-.env/
-
-.idea/
+.idea
 .vscode
-dist/
-.env/
-proyecto/.env
-proyecto/frontend/.env
-proyecto/api/node_modules/
 .vercel/
 
-
+# root accidental packages
+/package.json
+/package-lock.json
