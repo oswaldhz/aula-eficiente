@@ -101,6 +101,17 @@ async function ensureTeacherExists(clerkUserId) {
   return { id: clerkUserId, ...teacherSnap.val() };
 }
 
+app.get("/api/debug-env", (req, res) => {
+  res.json({
+    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? `set (len=${process.env.CLERK_SECRET_KEY.length})` : "NOT SET",
+    CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? `set (len=${process.env.CLERK_PUBLISHABLE_KEY.length})` : "NOT SET",
+    CLERK_CLIENT_ID: process.env.CLERK_CLIENT_ID ? `set (len=${process.env.CLERK_CLIENT_ID.length})` : "NOT SET",
+    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "set" : "NOT SET",
+    FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL ? "set" : "NOT SET",
+    node: process.version,
+  });
+});
+
 app.get("/api/debug-auth", async (req, res) => {
   const header = req.headers.authorization;
   if (!header) return res.json({ error: "No Authorization header" });
