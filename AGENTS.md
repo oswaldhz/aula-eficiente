@@ -62,13 +62,14 @@ CLERK_WEBHOOK_SECRET
 ### Frontend (`proyecto/frontend/.env`)
 ```
 VITE_CLERK_PUBLISHABLE_KEY
-VITE_API_URL                 # defaults to "" (same origin in production)
+VITE_API_URL                 # defaults to "/api" (code fallback in api.js:1)
 ```
 
 ### Quirks
 - `FIREBASE_PRIVATE_KEY` parsing in `getFirebasePrivateKey()`: strips surrounding quotes and replaces `\n` with actual newlines.
 - Env validation runs at module load time (warn-only, no `process.exit(1)`). Missing vars produce a warning but the server starts.
 - Debug endpoints (`/api/debug-env`, `/api/debug-auth`) are conditionally registered when `NODE_ENV !== "production"`.
+- `VITE_API_URL` must be `/api` for API calls to work on Vercel. Code defaults to `/api` in `api.js:1` so only override if dev needs a different URL.
 
 ## Frontend
 
