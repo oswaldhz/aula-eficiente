@@ -111,6 +111,36 @@ async function ensureTeacherExists(clerkUserId) {
   return { id: clerkUserId, ...teacherSnap.val() };
 }
 
+app.get("/api/debug-auth", async (req, res) => {
+  const header = req.headers.authorization;
+  if (!header) return res.json({ error: "No Authorization header" });
+
+  const token = header.startsWith("Bearer ") ? header.slice(7) : header;
+  const parts = token.split(".");
+  if (parts.length !== 3) return res.json({ error: "Not a valid JWT", preview: token.slice(0, 30) });
+
+  try {
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8"));
+    const verrs = [];
+    let verResult = null;
+    try {
+      verResult = await clerkClient.verifyToken(token, { jwtKey: process.env.CLERK_JWT_KEY });
+    } catch (e) {
+      verrs.push(e.message || String(e));
+    }
+    return res.json({
+      payload,
+      issuerExpected: `https://${payload.iss || "clerk.unknown"}`,
+      azp: payload.azp,
+      authorizedParties: [req.headers.origin, req.headers.host && `https://${req.headers.host}`, process.env.CLERK_ALLOWED_AZP].filter(Boolean),
+      authenticateRequestError: verrs,
+      authenticateRequestResult: verResult ? { sub: verResult.sub } : null,
+    });
+  } catch (e) {
+    return res.json({ error: e.message });
+  }
+});
+
 app.use(async (req, res, next) => {
   if (req.method === "OPTIONS") return next();
   if (req.path === "/api/clerk-webhook") return next();
