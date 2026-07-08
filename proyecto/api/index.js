@@ -82,12 +82,18 @@ const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, ne
 async function getTeacherIdFromToken(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
-  const token = authHeader.slice(7);
   try {
-    const decoded = await clerkClient.verifyToken(token);
-    return decoded.sub;
+    const url = `${req.protocol || "https"}://${req.headers.host || "localhost"}${req.originalUrl || req.url}`;
+    const headers = new Headers();
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (v) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
+    }
+    const webReq = new Request(url, { method: req.method, headers });
+    const state = await clerkClient.authenticateRequest(webReq);
+    if (!state.isAuthenticated) return null;
+    return state.toAuth().userId;
   } catch (e) {
-    console.error("Clerk verifyToken error:", e?.errors || e?.message || e);
+    console.error("Clerk auth error:", e?.errors || e?.message || e);
     return null;
   }
 }
@@ -137,7 +143,14 @@ app.get("/api/debug-auth", async (req, res) => {
     const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8"));
     let verifyResult = null, verifyError = null;
     try {
-      verifyResult = await clerkClient.verifyToken(token);
+      const url = `${req.protocol || "https"}://${req.headers.host || "localhost"}${req.originalUrl || req.url}`;
+      const headers = new Headers();
+      for (const [k, v] of Object.entries(req.headers)) {
+        if (v) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
+      }
+      const state = await clerkClient.authenticateRequest(new Request(url, { method: req.method, headers }));
+      verifyResult = state.isAuthenticated ? { sub: state.toAuth().userId } : null;
+      if (!state.isAuthenticated) verifyError = `Not authenticated: ${state.reason || state.message || "unknown"}`;
     } catch (e) {
       verifyError = e?.errors || e?.message || String(e);
     }
