@@ -119,8 +119,11 @@ async function ensureTeacherExists(clerkUserId) {
 app.get("/api/debug-env", (req, res) => {
   res.json({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? `set (len=${process.env.CLERK_SECRET_KEY.length})` : "NOT SET",
-    CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
-    CLERK_CLIENT_ID: process.env.CLERK_CLIENT_ID ? "set" : "NOT SET",
+    CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? `set (len=${process.env.CLERK_PUBLISHABLE_KEY.length})` : "NOT SET",
+    CLERK_CLIENT_ID: process.env.CLERK_CLIENT_ID ? `set (len=${process.env.CLERK_CLIENT_ID.length})` : "NOT SET",
+    VITE_CLERK_PUBLISHABLE_KEY: process.env.VITE_CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
+    NEXT_PUBLIC_CLERK: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
+    REACT_APP_CLERK_PK: process.env.REACT_APP_CLERK_PUBLISHABLE_KEY ? "set" : "NOT SET",
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "set" : "NOT SET",
     FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL ? "set" : "NOT SET",
     FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? "set" : "NOT SET",
