@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import {
   Plus, Search, ClipboardList, Edit3, Trash2, X, Save,
   MoreVertical, Calendar, Target
@@ -19,12 +20,13 @@ export default function ActivitiesPage() {
   const [form, setForm] = useState({ title: "", description: "", due_date: "", max_score: "", classroom_id: "" });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  const { periodId } = usePeriod();
+
+  useEffect(() => { loadData(); }, [periodId]);
 
   const loadData = async () => {
     setIsLoading(true);
-    const periodo = localStorage.getItem("periodo");
-    const base = periodo ? `?period_id=${periodo}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     const [a, c] = await Promise.all([
       fetchData("activities"),
       fetchData(`classrooms${base}`),

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && npm run build"
+    "build": "cd frontend && npm install && npm run build",
+    "test": "node --test api/test/**/*.test.js",
+    "test:watch": "node --test --watch api/test/**/*.test.js"
   },
   "dependencies": {
     "express": "^4.21.0",

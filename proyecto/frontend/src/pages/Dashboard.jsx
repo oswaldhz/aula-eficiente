@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import {
   BookOpen, Users, ClipboardList, GraduationCap,
   Calendar, TrendingUp, ArrowRight, Plus, School
@@ -19,13 +20,13 @@ export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { fetchData } = useFetch();
+  const { periodId } = usePeriod();
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [periodId]);
 
   const loadData = async () => {
     setIsLoading(true);
-    const p = localStorage.getItem("periodo");
-    const base = p ? `?period_id=${p}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     try {
       const [classrooms, students, activities, grades] = await Promise.all([
         fetchData(`classrooms${base}`),

@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "teachers": {
+      ".indexOn": ["teacher_id"]
+    },
+    "periods": {
+      ".indexOn": ["teacher_id"]
+    },
+    "classrooms": {
+      ".indexOn": ["teacher_id", "period_id"]
+    },
+    "students": {
+      ".indexOn": ["teacher_id", "classroom_id"]
+    },
+    "activities": {
+      ".indexOn": ["teacher_id", "classroom_id"]
+    },
+    "grades": {
+      ".indexOn": ["teacher_id", "activity_id", "student_id"]
+    }
+  }
+}

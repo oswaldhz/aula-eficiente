@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
@@ -11,6 +12,7 @@ import {
 
 export default function ReportsPage() {
   const { fetchData } = useFetch();
+  const { periodId } = usePeriod();
   const [classrooms, setClassrooms] = useState([]);
   const [activities, setActivities] = useState([]);
   const [grades, setGrades] = useState([]);
@@ -22,7 +24,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadClassrooms();
-  }, []);
+  }, [periodId]);
 
   useEffect(() => {
     if (selectedClassroom) {
@@ -43,8 +45,7 @@ export default function ReportsPage() {
   }, [selectedActivity]);
 
   const loadClassrooms = async () => {
-    const periodo = localStorage.getItem("periodo");
-    const base = periodo ? `?period_id=${periodo}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     const c = await fetchData(`classrooms${base}`);
     setClassrooms(c);
   };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import {
   Plus, Search, School, Edit3, Trash2, X, Save,
   MoreVertical, BookOpen
@@ -18,12 +19,13 @@ export default function ClassroomsPage() {
   const [form, setForm] = useState({ name: "", description: "", period_id: "" });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  const { periodId } = usePeriod();
+
+  useEffect(() => { loadData(); }, [periodId]);
 
   const loadData = async () => {
     setIsLoading(true);
-    const periodo = localStorage.getItem("periodo");
-    const base = periodo ? `?period_id=${periodo}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     const [c, p] = await Promise.all([
       fetchData(`classrooms${base}`),
       fetchData("periods"),
@@ -35,8 +37,7 @@ export default function ClassroomsPage() {
 
   const openCreate = () => {
     setEditing(null);
-    const periodo = localStorage.getItem("periodo") || periods[0]?.id || "";
-    setForm({ name: "", description: "", period_id: periodo });
+    setForm({ name: "", description: "", period_id: periodId || periods[0]?.id || "" });
     setModalOpen(true);
   };
 

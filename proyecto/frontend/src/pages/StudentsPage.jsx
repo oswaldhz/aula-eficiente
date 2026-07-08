@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import * as XLSX from "xlsx";
 import {
   Plus, Search, Users, Edit3, Trash2, X, Save,
@@ -25,12 +26,13 @@ export default function StudentsPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => { loadData(); }, []);
+  const { periodId } = usePeriod();
+
+  useEffect(() => { loadData(); }, [periodId]);
 
   const loadData = async () => {
     setIsLoading(true);
-    const periodo = localStorage.getItem("periodo");
-    const base = periodo ? `?period_id=${periodo}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     const [s, c] = await Promise.all([
       fetchData("students"),
       fetchData(`classrooms${base}`),

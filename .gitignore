@@ -14,6 +14,8 @@ instance/
 .env.*.local
 .env.development
 .env.production
+.env.development.local
+.env.production.local
 proyecto/.env
 proyecto/frontend/.env
 proyecto/frontend/.env.development
@@ -41,6 +43,4 @@ yarn-error.log*
 .vscode
 .vercel/
 
-# root accidental packages
-/package.json
-/package-lock.json
+

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useFetch } from "../api";
+import { usePeriod } from "../context/PeriodContext";
 import {
   GraduationCap, Save, Check, X, ChevronRight,
   Search, BookOpen
@@ -8,6 +9,7 @@ import {
 
 export default function GradesPage() {
   const { fetchData, postData, putData } = useFetch();
+  const { periodId } = usePeriod();
   const [classrooms, setClassrooms] = useState([]);
   const [activities, setActivities] = useState([]);
   const [students, setStudents] = useState([]);
@@ -21,7 +23,7 @@ export default function GradesPage() {
 
   useEffect(() => {
     loadClassrooms();
-  }, []);
+  }, [periodId]);
 
   useEffect(() => {
     if (selectedClassroom) {
@@ -43,8 +45,7 @@ export default function GradesPage() {
   }, [selectedClassroom, selectedActivity]);
 
   const loadClassrooms = async () => {
-    const periodo = localStorage.getItem("periodo");
-    const base = periodo ? `?period_id=${periodo}` : "";
+    const base = periodId ? `?period_id=${periodId}` : "";
     const c = await fetchData(`classrooms${base}`);
     setClassrooms(c);
     setIsLoading(false);

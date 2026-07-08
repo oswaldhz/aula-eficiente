@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: proyecto
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: proyecto/package-lock.json
+
+      - run: npm ci
+
+      - name: Lint API
+        run: npx eslint api/ --ext .js --no-config-lookup --rules '{"no-unused-vars":"warn","no-undef":"error"}'
+
+      - name: Lint frontend
+        run: cd frontend && npm ci && npm run lint
+
+      - name: Test API
+        run: npm test
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY || 'test' }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY || 'test' }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'test' }}
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL || 'https://test.firebaseio.com' }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL || 'test@test.iam.gserviceaccount.com' }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY || 'test' }}
